@@ -2,6 +2,9 @@ package problems.qbfpt;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Set;
+import java.util.List;
+import java.util.HashSet;
 import problems.qbf.QBF_Inverse;
 
 /**
@@ -15,19 +18,21 @@ import problems.qbf.QBF_Inverse;
 public class QBFPT extends QBF_Inverse {
 
     /**
-     * The nx3 matrix T of prohibited triples.
+     * The hash set T of prohibited triples. To check if a triple is
+     * prohibited, call `T.contains(triple)` where `triple` must be of type
+     * List<Integer>.
      */
-    public final Integer[][] T;
+    public final Set<List<Integer>> T;
 
-	/**
-	 * Constructor for the QBFPT class.
-	 * 
-	 * @param filename
-	 *      Name of the file for which the objective function parameters
-	 *      should be read.
-	 * @throws IOException
-	 *      Necessary for I/O operations.
-	 */
+    /**
+     * Constructor for the QBFPT class.
+     * 
+     * @param filename
+     *      Name of the file for which the objective function parameters
+     *      should be read.
+     * @throws IOException
+     *      Necessary for I/O operations.
+     */
     public QBFPT(String filename) throws IOException {
         super(filename);
         T = generateTriples();
@@ -40,9 +45,10 @@ public class QBFPT extends QBF_Inverse {
      *  
      * @return The prohibited triples.
      */
-    private Integer[][] generateTriples() {
+    private Set<List<Integer>> generateTriples() {
 
-        Integer[][] _T = new Integer[size][];
+        Set<List<Integer>> _T = new HashSet<List<Integer>>();
+        Integer[] triple;
 
         /* 
          * NOTE: 
@@ -51,8 +57,9 @@ public class QBFPT extends QBF_Inverse {
          * triple element into other arrays (e.g., A, variables).
          */
         for (int u = 1; u <= size; u++) {
-            _T[u - 1] = new Integer[] {u, g(u), h(u)};
-            Arrays.sort(_T[u - 1]);
+            triple = new Integer[] {u, g(u), h(u)};
+            Arrays.sort(triple);
+            _T.add((List<Integer>)Arrays.asList(triple));
         }
 
         return _T;
@@ -137,14 +144,7 @@ public class QBFPT extends QBF_Inverse {
      * Prints prohibited triples {@link #T}.
      */
     public void printProhibitedTriples() {
-
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < 3; j++) {
-                System.out.print(T[i][j] + " ");
-            }
-            System.out.println();
-        }
-
+        System.out.println(Arrays.toString(T.toArray()));
     }
     
 }
