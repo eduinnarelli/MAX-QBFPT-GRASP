@@ -1,5 +1,5 @@
 /**
- * 
+ * GRASP metaheuristic abstract class.
  */
 package metaheuristics.grasp;
 
