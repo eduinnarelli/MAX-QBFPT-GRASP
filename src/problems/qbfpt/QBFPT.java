@@ -2,8 +2,8 @@ package problems.qbfpt;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Set;
 import java.util.List;
+import java.util.Set;
 import java.util.HashSet;
 import problems.qbf.QBF_Inverse;
 
@@ -18,11 +18,15 @@ import problems.qbf.QBF_Inverse;
 public class QBFPT extends QBF_Inverse {
 
     /**
-     * The hash set T of prohibited triples. To check if a triple is
-     * prohibited, call `T.contains(triple)` where `triple` must be of type
-     * List<Integer>.
+     * The set T of prohibited triples.
      */
-    public final Set<List<Integer>> T;
+    private final Set<List<Integer>> T;
+
+    /**
+     * T getter.
+     * @return The set T of prohibited triples.
+     */
+    public Set<List<Integer>> getT() { return T; };
 
     /**
      * Constructor for the QBFPT class.
@@ -37,7 +41,6 @@ public class QBFPT extends QBF_Inverse {
         super(filename);
         T = generateTriples();
     }
-
     
     /**
      * Generates the prohibited triples set T, where:
@@ -138,13 +141,6 @@ public class QBFPT extends QBF_Inverse {
 
         return l_res;
 
-    }
-
-    /**
-     * Prints prohibited triples {@link #T}.
-     */
-    public void printProhibitedTriples() {
-        System.out.println(Arrays.toString(T.toArray()));
     }
     
 }
