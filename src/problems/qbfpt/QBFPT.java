@@ -135,7 +135,7 @@ public class QBFPT extends QBF_Inverse {
                 return 1 + ((l_res + 1) % size);
             }
 
-            return 1 + (l_res % size);
+            return l_mod;
 
         }
 
