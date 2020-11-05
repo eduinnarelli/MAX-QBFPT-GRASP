@@ -22,6 +22,16 @@ public class Alpha {
     private Double A;
 
     /**
+     * Number of times this alpha was used.
+     */
+    private Integer timesUsed;
+
+    /**
+     * Accumulated cost of solutions that used alpha.
+     */
+    private Double accCost;
+
+    /**
      * Constructor for the Alpha class, where an Alpha object is initialized.
      * 
      * @param val
@@ -43,18 +53,21 @@ public class Alpha {
 
     /**
      * `value` getter.
+     * 
      * @return {@link #value}.
      */
     public Double getValue() { return value; };
 
     /**
      * `p` getter.
+     * 
      * @return {@link #p}.
      */
     public Double getP() { return p; };
 
     /**
      * `p` setter.
+     * 
      * @param prob
      *      New probability.
      */
@@ -62,6 +75,7 @@ public class Alpha {
 
     /**
      * `A` getter.
+     * 
      * @return {@link #A}.
      */
     public Double getA() { return A; };
@@ -72,8 +86,15 @@ public class Alpha {
      * @param cost
      *      Cost of a new solution that uses this alpha.
      */
-    public void updateA(Double cost) { 
-        A = (A + cost) / 2;
+    public void updateA(Double cost) {
+        
+        // Update accCost and timesUsed
+        timesUsed++;
+        accCost += cost;
+        
+        // Calculate average
+        A = accCost / timesUsed;
+
     };
 
 }
