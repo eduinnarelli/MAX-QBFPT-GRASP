@@ -23,17 +23,12 @@ public class QBFPT extends QBF_Inverse {
     private final Set<List<Integer>> T;
 
     /**
-     * T getter.
-     * @return The set T of prohibited triples.
-     */
-    public Set<List<Integer>> getT() { return T; };
-
-    /**
      * Constructor for the QBFPT class.
      * 
      * @param filename
      *      Name of the file for which the objective function parameters
      *      should be read.
+     * 
      * @throws IOException
      *      Necessary for I/O operations.
      */
@@ -41,6 +36,13 @@ public class QBFPT extends QBF_Inverse {
         super(filename);
         T = generateTriples();
     }
+
+    /**
+     * T getter.
+     * 
+     * @return {@link #T}.
+     */
+    public Set<List<Integer>> getT() { return T; };
     
     /**
      * Generates the prohibited triples set T, where:

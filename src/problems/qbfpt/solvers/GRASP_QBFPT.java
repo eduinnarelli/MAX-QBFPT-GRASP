@@ -37,7 +37,11 @@ public class GRASP_QBFPT extends GRASP_QBF {
      * @throws IOException
      *            Necessary for I/O operations.
      */
-    public GRASP_QBFPT(Double alpha, Integer iterations, String filename) throws IOException {
+    public GRASP_QBFPT(
+        Double alpha, 
+        Integer iterations, 
+        String filename
+    ) throws IOException {
 
         super(alpha, iterations, filename);
 
