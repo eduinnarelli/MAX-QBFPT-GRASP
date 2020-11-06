@@ -5,73 +5,81 @@ package metaheuristics.grasp;
 
 import java.util.ArrayList;
 import java.util.Random;
-
 import problems.Evaluator;
 import solutions.Solution;
+
+import metaheuristics.grasp.reactive.Alpha;
+import metaheuristics.grasp.reactive.AlphaMap;
 
 /**
  * Abstract class for metaheuristic GRASP (Greedy Randomized Adaptive Search
  * Procedure). It consider a minimization problem.
  * 
- * @author ccavellucci, fusberti
+ * @author ccavellucci, fusberti, aserpa, einnarelli
  * @param <E>
  *            Generic type of the element which composes the solution.
  */
 public abstract class AbstractGRASP<E> {
 
 	/**
-	 * flag that indicates whether the code should print more information on
-	 * screen
+	 * Flag that indicates whether the code should print more information on
+	 * screen.
 	 */
 	public static boolean verbose = true;
 
 	/**
-	 * a random number generator
+	 * A random number generator.
 	 */
 	static Random rng = new Random(0);
 
 	/**
-	 * the objective function being optimized
+	 * The objective function being optimized.
 	 */
 	protected Evaluator<E> ObjFunction;
 
 	/**
-	 * the GRASP greediness-randomness parameter
+	 * The non-reactive GRASP greediness-randomness parameter.
 	 */
 	protected Double alpha;
+	
+	/**
+	 * The reactive GRASP number of possible alphas ({@link #alpha}) to be
+	 * selected.
+	 */
+	protected Integer numAlphas;
 
 	/**
-	 * the best solution cost
+	 * The best solution cost.
 	 */
 	protected Double incumbentCost;
 
 	/**
-	 * the current solution cost
+	 * The current solution cost.
 	 */
 	protected Double currentCost;
 
 	/**
-	 * the best solution
+	 * The best solution.
 	 */
 	protected Solution<E> incumbentSol;
 
 	/**
-	 * the incumbent solution
+	 * The incumbent solution.
 	 */
 	protected Solution<E> currentSol;
 
 	/**
-	 * the number of iterations the GRASP main loop executes.
+	 * The number of iterations the GRASP main loop executes.
 	 */
 	protected Integer iterations;
 
 	/**
-	 * the Candidate List of elements to enter the solution.
+	 * The Candidate List of elements to enter the solution.
 	 */
 	protected ArrayList<E> CL;
 
 	/**
-	 * the Restricted Candidate List of elements to enter the solution.
+	 * The Restricted Candidate List of elements to enter the solution.
 	 */
 	protected ArrayList<E> RCL;
 
@@ -117,23 +125,51 @@ public abstract class AbstractGRASP<E> {
 	 */
 	public abstract Solution<E> localSearch();
 
+
 	/**
-	 * Constructor for the AbstractGRASP class.
+	 * Base constructor for the AbstractGRASP class, only called inside the 
+	 * class.
 	 * 
 	 * @param objFunction
-	 *            The objective function being minimized.
-	 * @param alpha
-	 *            The GRASP greediness-randomness parameter (within the range
-	 *            [0,1])
+	 * 		The objective function being minimized.
 	 * @param iterations
-	 *            The number of iterations which the GRASP will be executed.
+	 * 		The number of iterations which the GRASP will be executed.
 	 */
-	public AbstractGRASP(Evaluator<E> objFunction, Double alpha, Integer iterations) {
+	private AbstractGRASP(Evaluator<E> objFunction, Integer iterations) {
 		this.ObjFunction = objFunction;
-		this.alpha = alpha;
 		this.iterations = iterations;
 	}
-	
+
+	/**
+	 * Constructor for the non-reactive AbstractGRASP class, which calls the
+	 * base constructor ({@link #AbstractGRASP(Evaluator, Integer)}).
+	 * 
+	 * @param alpha
+	 *		The GRASP greediness-randomness parameter (within the range [0,1]).
+	 */
+	public AbstractGRASP(Evaluator<E> objFunction, Integer iterations, Double alpha) {
+		this(objFunction, iterations);
+		assert alpha >= 0.0 && alpha <= 1.0 : "alpha should be a double in [0, 1].";
+		this.alpha = alpha;
+	}
+
+	/**
+	 * Constructor for the reactive AbstractGRASP class, which calls the base
+	 * constructor ({@link #AbstractGRASP(Evaluator, Integer)}).
+	 * 
+	 * @param numAlphas
+	 *		Number of possible alphas to be selected.
+	 */
+	public AbstractGRASP(
+		Evaluator<E> objFunction, 
+		Integer iterations, 
+		Integer numAlphas
+	) {
+		this(objFunction, iterations);
+		assert numAlphas >= 1 : "numAlphas should be a positive integer.";
+		this.numAlphas = numAlphas;
+	}
+
 	/**
 	 * The GRASP constructive heuristic, which is responsible for building a
 	 * feasible solution by selecting in a greedy-random fashion, candidate
@@ -201,14 +237,55 @@ public abstract class AbstractGRASP<E> {
 	public Solution<E> solve() {
 
 		incumbentSol = createEmptySol();
+
+		/* Reactive GRASP alpha list, not instantiated in the non-reactive 
+		 * GRASP. */
+		AlphaMap alphaSet = null;
+
+		/* Reactive GRASP only happens if numAlphas was received in the
+		 * constructor, instead of alpha. */
+		boolean isReactive = numAlphas != null;
+
+		// Reactive GRASP:
+		if (isReactive) {
+			// Initialize alpha list.
+			alphaSet = new AlphaMap(numAlphas);
+		}
+
 		for (int i = 0; i < iterations; i++) {
+
+			// Reactive GRASP:
+			if (isReactive) {
+				// Select a random alpha from the weighted list.
+				alpha = alphaSet.selectItem();
+			}
+
+			// Greedy-random construction.
 			constructiveHeuristic();
+
+			// Try to improve the solution.
 			localSearch();
+
+			// Update incumbent solution, if necessary.
 			if (incumbentSol.cost > currentSol.cost) {
 				incumbentSol = new Solution<E>(currentSol);
 				if (verbose)
-					System.out.println("(Iter. " + i + ") BestSol = " + incumbentSol);
+					System.out.println("(Iter. " + i + ") BestSol = " + incumbentSol + ", alpha=" + alpha);
 			}
+
+			// Reactive GRASP:
+			if (isReactive && i < iterations - 1) {
+
+				// Update average cost of solutions that used alpha.
+				((Alpha) alphaSet.get(alpha)).updateA(currentSol.cost);
+
+				// Update the alpha probabilities at each 10 iterations.
+				if ((i + 1) % 10 == 0) {
+					alphaSet.updateProbabilities(incumbentSol.cost);
+				}
+
+			}
+
 		}
 
 		return incumbentSol;
