@@ -1,6 +1,7 @@
 package utils;
 
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Random;
 import java.util.TreeMap;
@@ -12,17 +13,17 @@ import java.util.TreeMap;
  * @author aserpa, einnarelli
  */
 @SuppressWarnings("serial")
-public abstract class WeightedBag<E> extends ArrayList<WeightedItem<E>> {
+public abstract class WeightedMap<E> extends LinkedHashMap<E, WeightedItem<E>> {
 
     /**
      * A random number generator.
      */
-	static Random rng = new Random(0);
+	static Random rng = new Random();
 
     /**
      * Number of elements in bag.
      */
-    private final Integer m;
+    protected final Integer m;
 
     /**
      * Initialize the bag of items.
@@ -30,17 +31,12 @@ public abstract class WeightedBag<E> extends ArrayList<WeightedItem<E>> {
     public abstract void initializeBag();
 
     /**
-     * Update the items in the bag.
-     */
-    public abstract void updateItems();
-
-    /**
      * Constructor for the WeightedBag class, where the bag is initialized.
      * 
      * @param m
      *      Number of elements.
      */
-    public WeightedBag(Integer m) {
+    public WeightedMap(Integer m) {
 
         // Call ArrayList constructor
         super();
@@ -60,22 +56,23 @@ public abstract class WeightedBag<E> extends ArrayList<WeightedItem<E>> {
     public E selectItem() {
 
         Double total = 0.0;
-        NavigableMap<Double, E> map = new TreeMap<Double, E>();
+        NavigableMap<Double, E> navMap = new TreeMap<Double, E>();
 
         /**
-         * Accumulate weights and put items in the map. Example:
+         * Accumulate weights and put items in the navigable map. Example:
          * - bag = {"Cat" with weight 3, "Dog" with weight 5};
          * - map = {3: "Cat", 8: "Dog"}.
          */
-        for (WeightedItem<E> item: this) {
+        for (Map.Entry<E, WeightedItem<E>> kv : this.entrySet()) {
+            WeightedItem<E> item = kv.getValue();
             total += item.getW();
-            map.put(total, item.getValue());
+            navMap.put(total, item.getValue());
         }
 
         /* Get a random value in the range [0, total] and returns the item
          * with the closest higher weight. */
         Double randValue = rng.nextDouble() * total;
-        return map.higherEntry(randValue).getValue();
+        return navMap.higherEntry(randValue).getValue();
 
     }
     

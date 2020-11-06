@@ -52,4 +52,14 @@ public class WeightedItem<E> {
      */
     public void setW(Double w) { this.w = w; };
 
+    /** 
+     * Show weighted item informations as a string. 
+     */
+    @Override
+    public String toString() {
+        String strValue = String.format("%.4f", value);
+        String strWeight = String.format("%.4f", w);
+        return "{value: " + strValue + ", weight: " + strWeight + "}";
+    }
+
 }
