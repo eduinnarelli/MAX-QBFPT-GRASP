@@ -7,7 +7,7 @@ import java.util.Random;
 import java.util.TreeMap;
 
 /**
- * Bag of weighted items, which can be randomly selected according to their
+ * Map of weighted items, which can be randomly selected according to their
  * weight.
  * 
  * @author aserpa, einnarelli
@@ -21,17 +21,17 @@ public abstract class WeightedMap<E> extends LinkedHashMap<E, WeightedItem<E>> {
 	static Random rng = new Random(0);
 
     /**
-     * Number of elements in bag.
+     * Number of elements in map.
      */
     protected final Integer m;
 
     /**
-     * Initialize the bag of items.
+     * Initialize the map of items.
      */
-    public abstract void initializeBag();
+    public abstract void initializeMap();
 
     /**
-     * Constructor for the WeightedBag class, where the bag is initialized.
+     * Constructor for the WeightedMap class, where the map is initialized.
      * 
      * @param m
      *      Number of elements.
@@ -41,14 +41,14 @@ public abstract class WeightedMap<E> extends LinkedHashMap<E, WeightedItem<E>> {
         // Call ArrayList constructor
         super();
 
-        // Initialize m and the bag
+        // Initialize m and the map
         this.m = m;
-        initializeBag();
+        initializeMap();
 
     }
 
     /**
-     * Randomly select an item from the bag, taking it's weight into account.
+     * Randomly select an item from the map, taking it's weight into account.
      * 
      * @return
      *      The selected item.
@@ -60,7 +60,7 @@ public abstract class WeightedMap<E> extends LinkedHashMap<E, WeightedItem<E>> {
 
         /**
          * Accumulate weights and put items in the navigable map. Example:
-         * - bag = {"Cat" with weight 3, "Dog" with weight 5};
+         * - map = {"Cat" with weight 3, "Dog" with weight 5};
          * - map = {3: "Cat", 8: "Dog"}.
          */
         for (Map.Entry<E, WeightedItem<E>> kv : this.entrySet()) {

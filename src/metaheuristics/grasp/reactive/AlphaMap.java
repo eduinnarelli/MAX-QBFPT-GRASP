@@ -13,11 +13,11 @@ import utils.WeightedItem;
 public class AlphaMap extends WeightedMap<Double> {
 
     /** 
-     * Constructor for the AlphaList class, where an AlphaList is 
+     * Constructor for the AlphaMap class, where an AlphaMap is 
      * initialized. 
      * 
      * @param m
-     *      Number of alphas in the list.
+     *      Number of alphas in the map.
      */
     public AlphaMap(Integer m) {
         super(m);
@@ -27,11 +27,11 @@ public class AlphaMap extends WeightedMap<Double> {
      * {@inheritDoc}
      * 
      * Each {@link Alpha} is initialized with the value i / m and probability 
-     * 1.0 / m of being selected, where i is its index in the list and m is 
+     * 1.0 / m of being selected, where i is its index in the map and m is 
      * the total number of alphas ({@link WeightedMap#m}).
      */
     @Override
-    public void initializeBag() {
+    public void initializeMap() {
         for (int i = 1; i <= m; i++) {
             Double val = (double) i / m;
             this.put(val, new Alpha(val, 1.0 / m));
