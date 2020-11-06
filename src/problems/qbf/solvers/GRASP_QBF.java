@@ -20,12 +20,12 @@ import solutions.Solution;
 public class GRASP_QBF extends AbstractGRASP<Integer> {
 
 	/**
-	 * Constructor for the GRASP_QBF class. An inverse QBF objective function is
-	 * passed as argument for the superclass constructor.
+	 * Constructor for the non-reactive GRASP_QBF. An inverse QBF objective 
+	 * function is passed as argument for the superclass constructor.
 	 * 
 	 * @param alpha
 	 *            The GRASP greediness-randomness parameter (within the range
-	 *            [0,1])
+	 *            [0,1]).
 	 * @param iterations
 	 *            The number of iterations which the GRASP will be executed.
 	 * @param filename
@@ -35,8 +35,27 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 	 *             necessary for I/O operations.
 	 */
 	public GRASP_QBF(Double alpha, Integer iterations, String filename) throws IOException {
-		super(new QBF_Inverse(filename), alpha, iterations);
+		super(new QBF_Inverse(filename), iterations, alpha);
 	}
+
+	/**
+	 * Constructor for the reactive GRASP_QBF. An inverse QBF objective 
+	 * function is passed as argument for the superclass constructor.
+	 * 
+	 * @param numAlphas
+	 *            Number of possible alphas.
+	 * @param iterations
+	 *            The number of iterations which the GRASP will be executed.
+	 * @param filename
+	 *            Name of the file for which the objective function parameters
+	 *            should be read.
+	 * @throws IOException
+	 *             necessary for I/O operations.
+	 */
+	public GRASP_QBF(Integer numAlphas, Integer iterations, String filename) throws IOException {
+		super(new QBF_Inverse(filename), iterations, numAlphas);
+	}
+
 
 	/*
 	 * (non-Javadoc)

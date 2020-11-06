@@ -18,7 +18,7 @@ public abstract class WeightedMap<E> extends LinkedHashMap<E, WeightedItem<E>> {
     /**
      * A random number generator.
      */
-	static Random rng = new Random();
+	static Random rng = new Random(0);
 
     /**
      * Number of elements in bag.

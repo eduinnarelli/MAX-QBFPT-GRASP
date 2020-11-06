@@ -5,9 +5,9 @@ package metaheuristics.grasp;
 
 import java.util.ArrayList;
 import java.util.Random;
+
 import problems.Evaluator;
 import solutions.Solution;
-
 import metaheuristics.grasp.reactive.Alpha;
 import metaheuristics.grasp.reactive.AlphaMap;
 
@@ -166,7 +166,7 @@ public abstract class AbstractGRASP<E> {
 		Integer numAlphas
 	) {
 		this(objFunction, iterations);
-		assert numAlphas >= 1 : "numAlphas should be a positive integer.";
+		assert numAlphas > 1 : "numAlphas should be a integer greater than 1.";
 		this.numAlphas = numAlphas;
 	}
 
@@ -280,7 +280,7 @@ public abstract class AbstractGRASP<E> {
 				((Alpha) alphaSet.get(alpha)).updateA(currentSol.cost);
 
 				// Update the alpha probabilities at each 10 iterations.
-				if ((i + 1) % 10 == 0) {
+				if ((i + 1) % (int) Math.sqrt(numAlphas) == 0) {
 					alphaSet.updateProbabilities(incumbentSol.cost);
 				}
 

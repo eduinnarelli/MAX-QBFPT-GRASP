@@ -24,11 +24,11 @@ public class GRASP_QBFPT extends GRASP_QBF {
     private final Set<List<Integer>> T;
 
     /**
-     * Constructor for the GRASP_QBFPT class.
+     * Constructor for the non-reactive GRASP_QBFPT class.
      * 
      * @param alpha
      *            The GRASP greediness-randomness parameter (within the range
-     *            [0,1])
+     *            [0,1]).
      * @param iterations
      *            The number of iterations which the GRASP will be executed.
      * @param filename
@@ -44,6 +44,34 @@ public class GRASP_QBFPT extends GRASP_QBF {
     ) throws IOException {
 
         super(alpha, iterations, filename);
+
+        // Instantiate QBFPT problem, store T and update objective reference.
+        QBFPT qbfpt = new QBFPT(filename);
+        T = qbfpt.getT();
+        ObjFunction = qbfpt;
+
+    }
+
+    /**
+     * Constructor for the reactive GRASP_QBFPT class.
+     * 
+	 * @param numAlphas
+	 *            Number of possible alphas.
+     * @param iterations
+     *            The number of iterations which the GRASP will be executed.
+     * @param filename
+     *            Name of the file for which the objective function parameters
+     *            should be read.
+     * @throws IOException
+     *            Necessary for I/O operations.
+     */
+    public GRASP_QBFPT(
+        Integer numAlphas, 
+        Integer iterations, 
+        String filename
+    ) throws IOException {
+
+        super(numAlphas, iterations, filename);
 
         // Instantiate QBFPT problem, store T and update objective reference.
         QBFPT qbfpt = new QBFPT(filename);
@@ -109,7 +137,7 @@ public class GRASP_QBFPT extends GRASP_QBF {
     public static void main(String[] args) throws IOException {
 
         long startTime = System.currentTimeMillis();
-        GRASP_QBF grasp = new GRASP_QBFPT(0.05, 1000, "instances/qbf020");
+        GRASP_QBF grasp = new GRASP_QBFPT(100, 1000, "instances/qbf100");
         Solution<Integer> bestSol = grasp.solve();
         System.out.println("maxVal = " + bestSol);
         long endTime   = System.currentTimeMillis();
