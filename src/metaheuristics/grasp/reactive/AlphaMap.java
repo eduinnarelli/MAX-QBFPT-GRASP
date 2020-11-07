@@ -8,9 +8,16 @@ import utils.WeightedItem;
 /** 
  * Map of alphas ({@link Alpha}) that can be selected during the Reactive
  * GRASP constructive phase.
+ * 
+ * @author aserpa, einnarelli
  */
 @SuppressWarnings("serial")
-public class AlphaMap extends WeightedMap<Double> {
+public class AlphaMap extends WeightedMap<Double, Double> {
+
+    /**
+     * Number of possible alphas.
+     */
+    private final Integer m;
 
     /** 
      * Constructor for the AlphaMap class, where an AlphaMap is 
@@ -20,18 +27,22 @@ public class AlphaMap extends WeightedMap<Double> {
      *      Number of alphas in the map.
      */
     public AlphaMap(Integer m) {
-        super(m);
+
+        // Call WeightedMap constructor.
+        super();
+
+        // Initialize m and the alphas.
+        this.m = m;
+        initializeAlphas();
+
     }
 
     /**
-     * {@inheritDoc}
-     * 
      * Each {@link Alpha} is initialized with the value i / m and probability 
      * 1.0 / m of being selected, where i is its index in the map and m is 
-     * the total number of alphas ({@link WeightedMap#m}).
+     * the total number of alphas ({@link #m}).
      */
-    @Override
-    public void initializeMap() {
+    public void initializeAlphas() {
         for (int i = 1; i <= m; i++) {
             Double val = (double) i / m;
             this.put(val, new Alpha(val, 1.0 / m));
@@ -39,31 +50,22 @@ public class AlphaMap extends WeightedMap<Double> {
     }
 
     /**
-     * Each alpha has its probability updated as the ratio between the 
-     * individual and accumulated {@link Alpha#getQ(double)}. 
+     * Each alpha has its weight updated as the individual {@link 
+     * Alpha#getQ(double)}. 
      * 
      * @param incumbentCost
      *      Cost of the best solution found so far.
      */
-    public void updateProbabilities(Double incumbentCost) {
+    public void updateWeights(Double incumbentCost) {
 
-        Double accQ = 0.0;
-
-        // Accumulate all Q's.
+        // Update weights.
         for (Map.Entry<Double, WeightedItem<Double>> kv : this.entrySet()) {
             WeightedItem<Double> item = kv.getValue();
             Alpha a = (Alpha) item; // cast to alpha
-            accQ += a.getQ(incumbentCost);
+            a.setW(a.getQ(incumbentCost));
         }
 
-        // Update probabilities (weights).
-        for (Map.Entry<Double, WeightedItem<Double>> kv : this.entrySet()) {
-            WeightedItem<Double> item = kv.getValue();
-            Alpha a = (Alpha) item; // cast to alpha
-            a.setW(a.getQ(incumbentCost) / accQ);
-        }
-
-        // Remove elements with probability 0 from the map.
+        // Remove elements with weight 0 from the map.
         this.entrySet().removeIf(entry -> entry.getValue().getW() == 0);
 
     }

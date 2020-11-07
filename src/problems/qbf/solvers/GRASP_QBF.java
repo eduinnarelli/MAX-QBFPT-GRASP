@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import metaheuristics.grasp.AbstractGRASP;
+import metaheuristics.grasp.bias.RCMap;
 import problems.qbf.QBF_Inverse;
 import solutions.Solution;
-
-
 
 /**
  * Metaheuristic GRASP (Greedy Randomized Adaptive Search Procedure) for
@@ -15,7 +14,7 @@ import solutions.Solution;
  * {@link #QuadracticBinaryFunction}). Since by default this GRASP considers
  * minimization problems, an inverse QBF function is adopted.
  * 
- * @author ccavellucci, fusberti
+ * @author ccavellucci, fusberti, aserpa, einnarelli
  */
 public class GRASP_QBF extends AbstractGRASP<Integer> {
 
@@ -32,7 +31,7 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 	 *            Name of the file for which the objective function parameters
 	 *            should be read.
 	 * @throws IOException
-	 *             necessary for I/O operations.
+	 *            necessary for I/O operations.
 	 */
 	public GRASP_QBF(Double alpha, Integer iterations, String filename) throws IOException {
 		super(new QBF_Inverse(filename), iterations, alpha);
@@ -50,7 +49,7 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 	 *            Name of the file for which the objective function parameters
 	 *            should be read.
 	 * @throws IOException
-	 *             necessary for I/O operations.
+	 *            necessary for I/O operations.
 	 */
 	public GRASP_QBF(Integer numAlphas, Integer iterations, String filename) throws IOException {
 		super(new QBF_Inverse(filename), iterations, numAlphas);
@@ -82,11 +81,19 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 	 */
 	@Override
 	public ArrayList<Integer> makeRCL() {
-
 		ArrayList<Integer> _RCL = new ArrayList<Integer>();
-
 		return _RCL;
+	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see grasp.abstracts.AbstractGRASP#makeRCM()
+	 */
+	@Override
+	public RCMap<Integer> makeRCM() {
+		RCMap<Integer> _RCM = new RCMap<Integer>();
+		return _RCM;
 	}
 
 	/*
@@ -183,7 +190,7 @@ public class GRASP_QBF extends AbstractGRASP<Integer> {
 	public static void main(String[] args) throws IOException {
 
 		long startTime = System.currentTimeMillis();
-		GRASP_QBF grasp = new GRASP_QBF(0.05, 1000, "instances/qbf020");
+		GRASP_QBF grasp = new GRASP_QBF(0.2, 1000, "instances/qbf020");
 		Solution<Integer> bestSol = grasp.solve();
 		System.out.println("maxVal = " + bestSol);
 		long endTime   = System.currentTimeMillis();

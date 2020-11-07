@@ -4,10 +4,15 @@
 package metaheuristics.grasp;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.Random;
+
 
 import problems.Evaluator;
 import solutions.Solution;
+import utils.WeightedItem;
+import metaheuristics.grasp.bias.RCMap;
 import metaheuristics.grasp.reactive.Alpha;
 import metaheuristics.grasp.reactive.AlphaMap;
 
@@ -31,7 +36,6 @@ public abstract class AbstractGRASP<E> {
 	 * A random number generator.
 	 */
 	static Random rng = new Random(0);
-
 	/**
 	 * The objective function being optimized.
 	 */
@@ -84,6 +88,18 @@ public abstract class AbstractGRASP<E> {
 	protected ArrayList<E> RCL;
 
 	/**
+	 * The Restricted Candidate Map of elements to enter the solution. This one
+	 * is a weighted map for the Biased GRASP.
+	 */
+	protected RCMap<E> RCM;
+
+	/**
+	 * Bias function that gives a weight to the candidate to be selected from
+	 * the {@Link #RCM}, according to it's rank.
+	 */
+	protected Function<Integer, Double> bias;
+
+	/**
 	 * Creates the Candidate List, which is an ArrayList of candidate elements
 	 * that can enter a solution.
 	 * 
@@ -100,6 +116,17 @@ public abstract class AbstractGRASP<E> {
 	 * @return The Restricted Candidate List.
 	 */
 	public abstract ArrayList<E> makeRCL();
+
+	/**
+	 * Creates the Restricted Candidate Map, which is an WeightedMap of the
+	 * best candidate elements that can enter a solution. The best candidates 
+	 * are defined through a quality threshold, delimited by the GRASP
+	 * {@link #alpha} greedyness-randomness parameter. Used in the Biased 
+	 * GRASP.
+	 * 
+	 * @return The Restricted Candidate Map.
+	 */
+	public abstract RCMap<E> makeRCM();
 
 	/**
 	 * Updates the Candidate List according to the incumbent solution
@@ -125,7 +152,6 @@ public abstract class AbstractGRASP<E> {
 	 */
 	public abstract Solution<E> localSearch();
 
-
 	/**
 	 * Base constructor for the AbstractGRASP class, only called inside the 
 	 * class.
@@ -138,6 +164,7 @@ public abstract class AbstractGRASP<E> {
 	private AbstractGRASP(Evaluator<E> objFunction, Integer iterations) {
 		this.ObjFunction = objFunction;
 		this.iterations = iterations;
+		setBias();
 	}
 
 	/**
@@ -180,9 +207,17 @@ public abstract class AbstractGRASP<E> {
 	public Solution<E> constructiveHeuristic() {
 
 		CL = makeCL();
-		RCL = makeRCL();
 		currentSol = createEmptySol();
 		currentCost = Double.POSITIVE_INFINITY;
+
+		/**
+		 * NOTE:
+		 * if a bias function is provided, we manipulate the weighted map, 
+		 * which has a method to select a candidate according to it's weight.
+		 */
+
+		if (bias == null) RCL = makeRCL(); 
+		else RCM = makeRCM();
 
 		/* Main loop, which repeats until the stopping criteria is reached. */
 		while (!constructiveStopCriteria()) {
@@ -191,6 +226,9 @@ public abstract class AbstractGRASP<E> {
 			currentCost = ObjFunction.evaluate(currentSol);
 			updateCL();
 
+			/* Stop if CL is empty after the update. */
+			if (CL.isEmpty()) { break; }
+			
 			/*
 			 * Explore all candidate elements to enter the solution, saving the
 			 * highest and lowest cost variation achieved by the candidates.
@@ -204,23 +242,35 @@ public abstract class AbstractGRASP<E> {
 			}
 
 			/*
-			 * Among all candidates, insert into the RCL those with the highest
-			 * performance using parameter alpha as threshold.
+			 * Among all candidates, insert into the RCL/RCM those with the 
+			 * highest performance using parameter alpha as threshold.
 			 */
 			for (E c : CL) {
 				Double deltaCost = ObjFunction.evaluateInsertionCost(c, currentSol);
 				if (deltaCost <= minCost + alpha * (maxCost - minCost)) {
-					RCL.add(c);
+					if (bias == null) RCL.add(c);
+					else RCM.put(deltaCost, new WeightedItem<E>(c, 1.0));
 				}
 			}
 
-			/* Choose a candidate randomly from the RCL */
-			int rndIndex = rng.nextInt(RCL.size());
-			E inCand = RCL.get(rndIndex);
+			/* Choose a candidate randomly from the RCL/RCM. */
+
+			E inCand;
+			if (bias == null) {
+				int rndIndex = rng.nextInt(RCL.size());
+				inCand = RCL.get(rndIndex);
+			} else {
+				/* Update RCM weights if a bias function was provided. */
+				RCM.updateWeights(this.bias);
+				inCand = RCM.selectItem();
+			}
+
+
 			CL.remove(inCand);
 			currentSol.add(inCand);
 			ObjFunction.evaluate(currentSol);
-			RCL.clear();
+			if (bias == null) RCL.clear();
+			else RCM.clear();
 
 		}
 
@@ -238,9 +288,9 @@ public abstract class AbstractGRASP<E> {
 
 		incumbentSol = createEmptySol();
 
-		/* Reactive GRASP alpha list, not instantiated in the non-reactive 
+		/* Reactive GRASP alpha map, not instantiated in the non-reactive 
 		 * GRASP. */
-		AlphaMap alphaSet = null;
+		AlphaMap alphaMap = null;
 
 		/* Reactive GRASP only happens if numAlphas was received in the
 		 * constructor, instead of alpha. */
@@ -249,7 +299,7 @@ public abstract class AbstractGRASP<E> {
 		// Reactive GRASP:
 		if (isReactive) {
 			// Initialize alpha list.
-			alphaSet = new AlphaMap(numAlphas);
+			alphaMap = new AlphaMap(numAlphas);
 		}
 
 		for (int i = 0; i < iterations; i++) {
@@ -257,7 +307,7 @@ public abstract class AbstractGRASP<E> {
 			// Reactive GRASP:
 			if (isReactive) {
 				// Select a random alpha from the weighted list.
-				alpha = alphaSet.selectItem();
+				alpha = alphaMap.selectItem();
 			}
 
 			// Greedy-random construction.
@@ -277,11 +327,11 @@ public abstract class AbstractGRASP<E> {
 			if (isReactive && i < iterations - 1) {
 
 				// Update average cost of solutions that used alpha.
-				((Alpha) alphaSet.get(alpha)).updateA(currentSol.cost);
+				((Alpha) alphaMap.get(alpha)).updateA(currentSol.cost);
 
 				// Update the alpha probabilities at each 10 iterations.
 				if ((i + 1) % (int) Math.sqrt(numAlphas) == 0) {
-					alphaSet.updateProbabilities(incumbentSol.cost);
+					alphaMap.updateWeights(incumbentSol.cost);
 				}
 
 			}
@@ -301,5 +351,10 @@ public abstract class AbstractGRASP<E> {
 	public Boolean constructiveStopCriteria() {
 		return (currentCost > currentSol.cost) ? false : true;
 	}
+
+	/**
+	 * Function to set the bias function. By default, do nothing (no bias).
+	 */
+	public void setBias() {}
 
 }

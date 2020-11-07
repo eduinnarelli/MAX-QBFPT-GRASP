@@ -5,6 +5,8 @@ import utils.WeightedItem;
 /**
  * Alpha used in Reactive GRASP, which have a changeable probability of being
  * selected that relies on the value of the solutions that used it.
+ * 
+ * @author aserpa, einnarelli
  */
 public class Alpha extends WeightedItem<Double> {
 

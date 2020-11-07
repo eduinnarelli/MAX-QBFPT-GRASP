@@ -57,7 +57,10 @@ public class WeightedItem<E> {
      */
     @Override
     public String toString() {
-        String strValue = String.format("%.4f", value);
+        String strValue = 
+            (value instanceof Double) ? 
+            String.format("%.4f", value) : 
+            value.toString();
         String strWeight = String.format("%.4f", w);
         return "{value: " + strValue + ", weight: " + strWeight + "}";
     }

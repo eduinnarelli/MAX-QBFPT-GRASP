@@ -1,6 +1,5 @@
 package utils;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Random;
@@ -13,7 +12,7 @@ import java.util.TreeMap;
  * @author aserpa, einnarelli
  */
 @SuppressWarnings("serial")
-public abstract class WeightedMap<E> extends LinkedHashMap<E, WeightedItem<E>> {
+public abstract class WeightedMap<E, T> extends TreeMap<E, WeightedItem<T>> {
 
     /**
      * A random number generator.
@@ -21,30 +20,11 @@ public abstract class WeightedMap<E> extends LinkedHashMap<E, WeightedItem<E>> {
 	static Random rng = new Random(0);
 
     /**
-     * Number of elements in map.
+     * Constructor for the WeightedMap class, where the TreeMap constructor
+     * is called.
      */
-    protected final Integer m;
-
-    /**
-     * Initialize the map of items.
-     */
-    public abstract void initializeMap();
-
-    /**
-     * Constructor for the WeightedMap class, where the map is initialized.
-     * 
-     * @param m
-     *      Number of elements.
-     */
-    public WeightedMap(Integer m) {
-
-        // Call ArrayList constructor
+    public WeightedMap() {
         super();
-
-        // Initialize m and the map
-        this.m = m;
-        initializeMap();
-
     }
 
     /**
@@ -53,18 +33,18 @@ public abstract class WeightedMap<E> extends LinkedHashMap<E, WeightedItem<E>> {
      * @return
      *      The selected item.
      */
-    public E selectItem() {
+    public T selectItem() {
 
         Double total = 0.0;
-        NavigableMap<Double, E> navMap = new TreeMap<Double, E>();
+        NavigableMap<Double, T> navMap = new TreeMap<Double, T>();
 
         /**
          * Accumulate weights and put items in the navigable map. Example:
          * - map = {"Cat" with weight 3, "Dog" with weight 5};
          * - map = {3: "Cat", 8: "Dog"}.
          */
-        for (Map.Entry<E, WeightedItem<E>> kv : this.entrySet()) {
-            WeightedItem<E> item = kv.getValue();
+        for (Map.Entry<E, WeightedItem<T>> kv : this.entrySet()) {
+            WeightedItem<T> item = kv.getValue();
             total += item.getW();
             navMap.put(total, item.getValue());
         }
