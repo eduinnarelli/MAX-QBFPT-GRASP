@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.HashSet;
-
 import problems.qbf.solvers.GRASP_QBF;
+import problems.qbf.solvers.GRASP_QBF_First_Improving;
 import problems.qbfpt.QBFPT;
 import solutions.Solution;
 
@@ -17,7 +17,7 @@ import solutions.Solution;
  * 
  * @author aserpa, einnarelli
  */
-public class GRASP_QBFPT extends GRASP_QBF {
+public class GRASP_QBFPT_First_Improving extends GRASP_QBF_First_Improving {
 
     /**
      * The set T of prohibited triples.
@@ -25,11 +25,11 @@ public class GRASP_QBFPT extends GRASP_QBF {
     private final Set<List<Integer>> T;
 
     /**
-     * Constructor for the non-reactive GRASP_QBFPT class.
+     * Constructor for the GRASP_QBFPT class.
      * 
      * @param alpha
      *            The GRASP greediness-randomness parameter (within the range
-     *            [0,1]).
+     *            [0,1])
      * @param iterations
      *            The number of iterations which the GRASP will be executed.
      * @param filename
@@ -38,7 +38,7 @@ public class GRASP_QBFPT extends GRASP_QBF {
      * @throws IOException
      *            Necessary for I/O operations.
      */
-    public GRASP_QBFPT(
+    public GRASP_QBFPT_First_Improving(
         Double alpha, 
         Integer iterations, 
         String filename
@@ -53,39 +53,11 @@ public class GRASP_QBFPT extends GRASP_QBF {
 
     }
 
-    /**
-     * Constructor for the reactive GRASP_QBFPT class.
-     * 
-	 * @param numAlphas
-	 *            Number of possible alphas.
-     * @param iterations
-     *            The number of iterations which the GRASP will be executed.
-     * @param filename
-     *            Name of the file for which the objective function parameters
-     *            should be read.
-     * @throws IOException
-     *            Necessary for I/O operations.
-     */
-    public GRASP_QBFPT(
-        Integer numAlphas, 
-        Integer iterations, 
-        String filename
-    ) throws IOException {
-
-        super(numAlphas, iterations, filename);
-
-        // Instantiate QBFPT problem, store T and update objective reference.
-        QBFPT qbfpt = new QBFPT(filename);
-        T = qbfpt.getT();
-        ObjFunction = qbfpt;
-
-    }
-
     /*
-     * (non-Javadoc)
-     * 
-     * @see grasp.abstracts.AbstractGRASP#updateCL()
-     */
+    * (non-Javadoc)
+    * 
+    * @see grasp.abstracts.AbstractGRASP#updateCL()
+    */
     @Override
     public void updateCL() {
 
@@ -132,23 +104,13 @@ public class GRASP_QBFPT extends GRASP_QBF {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see grasp.abstracts.AbstractGRASP#setBias()
-     */
-    @Override
-    public void setBias() {
-        //bias = r -> 1.0 / r; // linear bias
-    }
-
     /**
      * A main method used for testing the GRASP metaheuristic.
      */
     public static void main(String[] args) throws IOException {
 
         long startTime = System.currentTimeMillis();
-        GRASP_QBF grasp = new GRASP_QBFPT(0.2, 1000, "instances/qbf400");
+        GRASP_QBFPT_First_Improving grasp = new GRASP_QBFPT_First_Improving(0.05, 1000, "instances/qbf020");
         Solution<Integer> bestSol = grasp.solve();
         System.out.println("maxVal = " + bestSol);
         long endTime   = System.currentTimeMillis();
