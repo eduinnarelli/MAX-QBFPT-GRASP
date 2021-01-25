@@ -1,4 +1,4 @@
-Problema MAX-QBF com Triplas Proibidas (MAX-QBFPT)
+GRASP para o Problema MAX-QBF com Triplas Proibidas (MAX-QBFPT)
 ================================
 
 Atividade 4 de MO824 - Tópicos em Otimização Combinatória.
